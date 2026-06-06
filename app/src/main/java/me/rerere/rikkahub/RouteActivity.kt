@@ -183,12 +183,12 @@ class RouteActivity : ComponentActivity() {
         }
         startService(webIntent)
 
-        // 异步检测本地 llama.cpp（127.0.0.1:8080）并自动更新模型列表
+        // 异步检测本地模型路由（127.0.0.1:18888）并自动更新模型列表
         CoroutineScope(Dispatchers.IO).launch {
-            kotlinx.coroutines.delay(2000) // 等 llama.cpp 准备好
+            kotlinx.coroutines.delay(2000) // 等模型路由就绪
             try {
                 val request = Request.Builder()
-                    .url("http://127.0.0.1:8080/v1/models")
+                    .url("http://127.0.0.1:18888/v1/models")
                     .get()
                     .build()
                 val response = okHttpClient.newCall(request).execute()
@@ -220,8 +220,21 @@ class RouteActivity : ComponentActivity() {
                         }
                         if (localIdx >= 0) {
                             providers[localIdx] = (providers[localIdx] as AiProviderSetting.OpenAI).copy(
+                                baseUrl = "http://127.0.0.1:18888",
+                                apiKey = "local",
                                 models = remoteModels,
                                 enabled = true,
+                            )
+                        } else {
+                            // 首次检测到，自动创建 Provider
+                            providers.add(
+                                AiProviderSetting.OpenAI(
+                                    name = "本地模型",
+                                    baseUrl = "http://127.0.0.1:18888",
+                                    apiKey = "local",
+                                    models = remoteModels,
+                                    enabled = true,
+                                )
                             )
                         }
                         settings.copy(
