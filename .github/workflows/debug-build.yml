@@ -21,11 +21,21 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Node.js + pnpm (for web-ui build)
+      - name: Setup Node.js + pnpm
         uses: actions/setup-node@v4
         with:
           node-version: '20'
       - run: npm install -g pnpm
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ hashFiles('web-ui/pnpm-lock.yaml') }}
+
+      - name: Install web-ui dependencies
+        working-directory: web-ui
+        run: pnpm install --frozen-lockfile
 
       - name: Gradle cache
         uses: actions/cache@v4
