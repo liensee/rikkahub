@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,7 +31,39 @@ jobs:
 
       - name: Create dummy google-services.json
         run: |
-          echo '{"project_info":{"project_number":"0","project_id":"dummy"},"client":[{"client_info":{"mobilesdk_app_id":"1:0:android:000","android_client_info":{"package_name":"me.rerere.rikkahub"}},"oauth_client":[],"api_key":[{"current_key":"dummy"}],"services":{"analytics_service":{"status":1},"appinvite_service":{"status":1},"ads_service":{"status":1}}}]}' > app/google-services.json
+          cat > app/google-services.json << 'JSONEOF'
+          {
+            "project_info": {"project_number": "0", "project_id": "dummy"},
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:0:android:000",
+                  "android_client_info": {"package_name": "me.rerere.rikkahub"}
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy"}],
+                "services": {
+                  "analytics_service": {"status": 1},
+                  "appinvite_service": {"status": 1},
+                  "ads_service": {"status": 1}
+                }
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:0:android:001",
+                  "android_client_info": {"package_name": "me.rerere.rikkahub.debug"}
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy"}],
+                "services": {
+                  "analytics_service": {"status": 1},
+                  "appinvite_service": {"status": 1},
+                  "ads_service": {"status": 1}
+                }
+              }
+            ]
+          }
+          JSONEOF
 
       - name: Create local.properties
         run: |
