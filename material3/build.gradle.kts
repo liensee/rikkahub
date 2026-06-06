@@ -29,5 +29,5 @@ android {
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
-    implementation("androidx.compose.material3:material3")
+    implementation(libs.androidx.material3)
 }
