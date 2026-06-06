@@ -3,6 +3,7 @@ package me.rerere.rikkahub
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
@@ -198,7 +199,7 @@ class RouteActivity : ComponentActivity() {
                     
                     val remoteModels = modelsArray.mapNotNull { item ->
                         val obj = item.jsonObject
-                        val modelId = obj["id"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
+                        val modelId = obj["id"]?.jsonPrimitive?.content ?: return@mapNotNull null
                         AiModel(
                             id = Uuid.random(),
                             modelId = modelId,
