@@ -123,11 +123,22 @@ import me.rerere.rikkahub.ui.pages.webview.WebViewPage
 import me.rerere.rikkahub.ui.theme.LocalDarkMode
 import me.rerere.rikkahub.ui.theme.RikkahubTheme
 import me.rerere.rikkahub.utils.CrashHandler
+import me.rerere.rikkahub.utils.JsonInstant
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.koin.android.ext.android.inject
 import org.koin.compose.koinInject
 import me.rerere.rikkahub.service.WebServerService
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import me.rerere.ai.provider.Model as AiModel
+import me.rerere.ai.provider.Modality as AiModality
+import me.rerere.ai.provider.ProviderSetting as AiProviderSetting
 
 private const val TAG = "RouteActivity"
 
@@ -170,6 +181,59 @@ class RouteActivity : ComponentActivity() {
             putExtra(WebServerService.EXTRA_LOCALHOST_ONLY, true)
         }
         startService(webIntent)
+
+        // 异步检测本地桥接（127.0.0.1:18888）并自动更新模型列表
+        CoroutineScope(Dispatchers.IO).launch {
+            kotlinx.coroutines.delay(2000) // 等 bridge 准备好
+            try {
+                val request = Request.Builder()
+                    .url("http://127.0.0.1:18888/v1/models")
+                    .get()
+                    .build()
+                val response = okHttpClient.newCall(request).execute()
+                if (response.isSuccessful) {
+                    val body = response.body?.string() ?: return@launch
+                    val json = JsonInstant.parseToJsonElement(body)
+                    val modelsArray = json.jsonObject["data"]?.jsonArray ?: return@launch
+                    
+                    val remoteModels = modelsArray.mapNotNull { item ->
+                        val obj = item.jsonObject
+                        val modelId = obj["id"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
+                        AiModel(
+                            id = Uuid.random(),
+                            modelId = modelId,
+                            displayName = modelId,
+                            inputModalities = listOf(AiModality.TEXT),
+                            outputModalities = listOf(AiModality.TEXT),
+                            abilities = listOf(),
+                        )
+                    }
+
+                    if (remoteModels.isEmpty()) return@launch
+
+                    settingsStore.update { settings ->
+                        val providers = settings.providers.toMutableList()
+                        val localIdx = providers.indexOfFirst {
+                            it is AiProviderSetting.OpenAI &&
+                            it.name == "本地模型"
+                        }
+                        if (localIdx >= 0) {
+                            providers[localIdx] = (providers[localIdx] as AiProviderSetting.OpenAI).copy(
+                                models = remoteModels,
+                                enabled = true,
+                            )
+                        }
+                        settings.copy(
+                            providers = providers,
+                            chatModelId = remoteModels.first().id,
+                        )
+                    }
+                    Log.i(TAG, "桥接检测成功: ${remoteModels.size} 个模型已自动添加")
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "桥接检测失败（桥接未运行）: ${e.message}")
+            }
+        }
 
         setContent {
             RikkahubTheme {
