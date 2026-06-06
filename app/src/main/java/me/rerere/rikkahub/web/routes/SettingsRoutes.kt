@@ -9,7 +9,11 @@ import io.ktor.server.routing.route
 import io.ktor.server.sse.heartbeat
 import io.ktor.server.sse.sse
 import me.rerere.ai.provider.BuiltInTools
+import me.rerere.ai.provider.Model
+import me.rerere.ai.provider.ModelAbility
 import me.rerere.ai.provider.ModelType
+import me.rerere.ai.provider.Modality
+import me.rerere.ai.provider.ProviderSetting
 import me.rerere.rikkahub.data.datastore.SettingsStore
 import me.rerere.rikkahub.data.datastore.findModelById
 import me.rerere.rikkahub.utils.JsonInstant
@@ -26,6 +30,7 @@ import me.rerere.rikkahub.web.dto.UpdateSearchEnabledRequest
 import me.rerere.rikkahub.web.dto.UpdateSearchServiceRequest
 import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.Uuid
 
 fun Route.settingsRoutes(
     settingsStore: SettingsStore
@@ -189,6 +194,95 @@ fun Route.settingsRoutes(
 
             settingsStore.update { settings ->
                 settings.copy(favoriteModels = favoriteModelIds)
+            }
+            call.respond(HttpStatusCode.OK, mapOf("status" to "ok"))
+        }
+
+        // === Provider 管理 API（供自动配置） ===
+        post("/providers/add-openai") {
+            val body = call.receive<Map<String, String>>()
+            val name = body["name"] ?: "Local LLM"
+            val baseUrl = body["baseUrl"] ?: "http://127.0.0.1:18888/v1"
+            val apiKey = body["apiKey"] ?: "not-needed"
+            val modelId = body["modelId"] ?: "local-model"
+            val modelDisplayName = body["modelDisplayName"] ?: "Local LLM"
+
+            val providerId = Uuid.random()
+            val newModel = Model(
+                id = Uuid.random(),
+                modelId = modelId,
+                displayName = modelDisplayName,
+                type = ModelType.CHAT,
+                inputModalities = listOf(Modality.TEXT),
+                outputModalities = listOf(Modality.TEXT),
+                abilities = listOf(),
+            )
+
+            val provider = ProviderSetting.OpenAI(
+                id = providerId,
+                name = name,
+                baseUrl = baseUrl,
+                apiKey = apiKey,
+                enabled = true,
+                builtIn = false,
+                models = listOf(newModel),
+            )
+
+            settingsStore.update { settings ->
+                val providers = settings.providers.toMutableList()
+                // 如果同名已存在，替换
+                val existingIndex = providers.indexOfFirst {
+                    it is ProviderSetting.OpenAI && it.name == name
+                }
+                if (existingIndex >= 0) {
+                    val existing = providers[existingIndex] as? ProviderSetting.OpenAI
+                    if (existing != null) {
+                        providers[existingIndex] = provider.copy(
+                            id = existing.id,
+                            models = existing.models + newModel
+                        )
+                    }
+                } else {
+                    providers.add(provider)
+                }
+                settings.copy(providers = providers)
+            }
+
+            call.respond(HttpStatusCode.OK, mapOf(
+                "status" to "ok",
+                "providerId" to providerId.toString(),
+                "modelId" to newModel.id.toString(),
+            ))
+        }
+
+        post("/providers/set-active-model") {
+            val body = call.receive<Map<String, String>>()
+            val providerName = body["providerName"] ?: "Local LLM"
+            val modelIdStr = body["modelId"]
+
+            val settings = settingsStore.settingsFlow.value
+            val provider = settings.providers.find {
+                it is ProviderSetting.OpenAI && it.name == providerName
+            } as? ProviderSetting.OpenAI
+                ?: throw NotFoundException("Provider '$providerName' not found")
+
+            val model = if (modelIdStr != null) {
+                provider.models.find { it.id.toString() == modelIdStr }
+                    ?: throw NotFoundException("Model not found in provider")
+            } else {
+                provider.models.firstOrNull()
+                    ?: throw NotFoundException("No models in provider")
+            }
+
+            settingsStore.update { s ->
+                s.copy(
+                    chatModelId = model.id,
+                    providers = s.providers.map {
+                        if (it is ProviderSetting.OpenAI && it.name == providerName) {
+                            it.copy(enabled = true)
+                        } else it
+                    }
+                )
             }
             call.respond(HttpStatusCode.OK, mapOf("status" to "ok"))
         }

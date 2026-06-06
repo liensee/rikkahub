@@ -233,7 +233,7 @@ class SettingsStore(
                     JsonInstant.decodeFromString(it)
                 } ?: emptyList(),
                 webServerEnabled = preferences[WEB_SERVER_ENABLED] == true,
-                webServerPort = preferences[WEB_SERVER_PORT] ?: 8080,
+                webServerPort = preferences[WEB_SERVER_PORT] ?: 8787,
                 webServerJwtEnabled = preferences[WEB_SERVER_JWT_ENABLED] == true,
                 webServerAccessPassword = preferences[WEB_SERVER_ACCESS_PASSWORD] ?: "",
                 webServerLocalhostOnly = preferences[WEB_SERVER_LOCALHOST_ONLY] == true,
@@ -533,7 +533,7 @@ data class Settings(
     val lorebooks: List<Lorebook> = emptyList(),
     val quickMessages: List<QuickMessage> = emptyList(),
     val webServerEnabled: Boolean = false,
-    val webServerPort: Int = 8080,
+    val webServerPort: Int = 8787,
     val webServerJwtEnabled: Boolean = false,
     val webServerAccessPassword: String = "",
     val webServerLocalhostOnly: Boolean = false,

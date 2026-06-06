@@ -126,6 +126,7 @@ import me.rerere.rikkahub.utils.CrashHandler
 import okhttp3.OkHttpClient
 import org.koin.android.ext.android.inject
 import org.koin.compose.koinInject
+import me.rerere.rikkahub.service.WebServerService
 import kotlin.uuid.Uuid
 
 private const val TAG = "RouteActivity"
@@ -161,6 +162,15 @@ class RouteActivity : ComponentActivity() {
             finish()
             return
         }
+
+        // 自动启动 Web 服务器（端口 8787，仅本地访问）
+        val webIntent = Intent(this, WebServerService::class.java).apply {
+            action = WebServerService.ACTION_START
+            putExtra(WebServerService.EXTRA_PORT, 8787)
+            putExtra(WebServerService.EXTRA_LOCALHOST_ONLY, true)
+        }
+        startService(webIntent)
+
         setContent {
             RikkahubTheme {
                 setSingletonImageLoaderFactory { context ->
