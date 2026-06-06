@@ -182,12 +182,12 @@ class RouteActivity : ComponentActivity() {
         }
         startService(webIntent)
 
-        // 异步检测本地桥接（127.0.0.1:18888）并自动更新模型列表
+        // 异步检测本地 llama.cpp（127.0.0.1:8080）并自动更新模型列表
         CoroutineScope(Dispatchers.IO).launch {
-            kotlinx.coroutines.delay(2000) // 等 bridge 准备好
+            kotlinx.coroutines.delay(2000) // 等 llama.cpp 准备好
             try {
                 val request = Request.Builder()
-                    .url("http://127.0.0.1:18888/v1/models")
+                    .url("http://127.0.0.1:8080/v1/models")
                     .get()
                     .build()
                 val response = okHttpClient.newCall(request).execute()
@@ -228,10 +228,10 @@ class RouteActivity : ComponentActivity() {
                             chatModelId = remoteModels.first().id,
                         )
                     }
-                    Log.i(TAG, "桥接检测成功: ${remoteModels.size} 个模型已自动添加")
+                    Log.i(TAG, "本地模型检测成功: ${remoteModels.size} 个模型已自动添加")
                 }
             } catch (e: Exception) {
-                Log.w(TAG, "桥接检测失败（桥接未运行）: ${e.message}")
+                Log.w(TAG, "本地模型检测失败（llama.cpp 可能未运行）: ${e.message}")
             }
         }
 

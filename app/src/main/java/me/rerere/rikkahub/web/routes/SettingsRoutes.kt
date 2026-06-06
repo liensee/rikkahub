@@ -202,7 +202,7 @@ fun Route.settingsRoutes(
         post("/providers/add-openai") {
             val body = call.receive<Map<String, String>>()
             val name = body["name"] ?: "Local LLM"
-            val baseUrl = body["baseUrl"] ?: "http://127.0.0.1:18888/v1"
+            val baseUrl = body["baseUrl"] ?: "http://127.0.0.1:8080/v1"
             val apiKey = body["apiKey"] ?: "not-needed"
             val modelId = body["modelId"] ?: "local-model"
             val modelDisplayName = body["modelDisplayName"] ?: "Local LLM"
