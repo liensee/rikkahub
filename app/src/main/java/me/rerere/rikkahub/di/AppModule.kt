@@ -7,6 +7,8 @@ import com.google.firebase.remoteconfig.remoteConfig
 import kotlinx.serialization.json.Json
 import me.rerere.highlight.Highlighter
 import me.rerere.rikkahub.AppScope
+import me.rerere.rikkahub.data.ai.mcp.HermesMCPService
+import me.rerere.rikkahub.data.ai.mcp.NativeMCPServer
 import me.rerere.rikkahub.data.ai.AILoggingManager
 import me.rerere.rikkahub.data.ai.tools.LocalTools
 import me.rerere.rikkahub.data.event.AppEventBus
@@ -96,6 +98,23 @@ val appModule = module {
             conversationRepo = get(),
             settingsStore = get(),
             filesManager = get()
+        )
+    }
+
+    single {
+        HermesMCPService(
+            context = get(),
+            settingsStore = get(),
+            mcpManager = get(),
+            skillManager = get(),
+            appScope = get(),
+        )
+    }
+
+    single {
+        NativeMCPServer(
+            context = get(),
+            appScope = get(),
         )
     }
 }

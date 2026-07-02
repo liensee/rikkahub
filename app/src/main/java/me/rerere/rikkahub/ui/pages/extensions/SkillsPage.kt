@@ -145,7 +145,7 @@ fun SkillsPage() {
                 }
             }
 
-            items(skills, key = { it.name }) { skill ->
+            items(skills, key = { it.key }) { skill ->
                 SkillCard(
                     skill = skill,
                     onClick = { navController.navigate(Screen.SkillDetail(skill.name)) },
@@ -227,7 +227,7 @@ fun SkillsPage() {
 
 @Composable
 private fun SkillCard(
-    skill: SkillMetadata,
+    skill: UnifiedSkill,
     onClick: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -244,11 +244,9 @@ private fun SkillCard(
                 .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = HugeIcons.Puzzle,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.primary,
+            Text(
+                text = skill.sourceIcon,
+                style = MaterialTheme.typography.titleMedium,
             )
             Column(
                 modifier = Modifier
@@ -256,10 +254,14 @@ private fun SkillCard(
                     .padding(start = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                Text(
-                    text = skill.name,
-                    style = MaterialTheme.typography.titleSmallEmphasized,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        text = skill.name,
+                        style = MaterialTheme.typography.titleSmallEmphasized,
+                    )
                 Text(
                     text = skill.description,
                     style = MaterialTheme.typography.bodySmall,

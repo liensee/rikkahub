@@ -18,12 +18,17 @@ import me.rerere.rikkahub.data.files.FileUtils
 import me.rerere.rikkahub.data.files.SkillFrontmatterParser
 import me.rerere.rikkahub.data.files.SkillManager
 import me.rerere.rikkahub.data.files.SkillMetadata
+import me.rerere.rikkahub.data.files.UnifiedSkill
+import me.rerere.rikkahub.data.ai.mcp.McpManager
+import me.rerere.rikkahub.data.datastore.SettingsStore
 import org.json.JSONArray
 
 class SkillsVM(
     private val skillManager: SkillManager,
+    private val mcpManager: McpManager,
+    private val settingsStore: SettingsStore,
 ) : ViewModel() {
-    private val _skills = MutableStateFlow<List<SkillMetadata>>(emptyList())
+    private val _skills = MutableStateFlow<List<UnifiedSkill>>(emptyList())
     val skills = _skills.asStateFlow()
 
     init {
@@ -32,7 +37,16 @@ class SkillsVM(
 
     private fun loadSkills() {
         viewModelScope.launch(Dispatchers.IO) {
-            _skills.value = skillManager.listSkills()
+            val local = skillManager.listSkills().map { UnifiedSkill.Local(it) }
+            val settings = settingsStore.settingsFlow.value
+            val mcpTools = settings.mcpServers
+                .filter { it.commonOptions.enable }
+                .flatMap { server ->
+                    server.commonOptions.tools
+                        .filter { it.enable }
+                        .map { tool -> UnifiedSkill.MCP(server.id, tool, server.commonOptions.name) }
+                }
+            _skills.value = local + mcpTools
         }
     }
 
