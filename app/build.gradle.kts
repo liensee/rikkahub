@@ -15,7 +15,7 @@ plugins {
 
 android {
     namespace = "me.rerere.rikkahub"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "me.rerere.rikkahub"

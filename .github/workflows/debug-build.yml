@@ -86,10 +86,15 @@ jobs:
         run: |
           echo "sdk.dir=/usr/lib/android-sdk" > local.properties
 
+      - name: Create dummy web static resources
+        run: |
+          mkdir -p web/src/main/resources/static
+          echo '<html><body>RikkaHub Web UI</body></html>' > web/src/main/resources/static/index.html
+
       - name: Build Debug APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug -x :web:buildWebUi -x :web:compileDebugKotlin -x :web:compileDebugJavaWithJavac
+          ./gradlew assembleDebug -x :web:buildWebUi
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4

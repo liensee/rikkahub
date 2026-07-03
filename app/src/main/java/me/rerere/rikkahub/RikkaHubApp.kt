@@ -299,7 +299,7 @@ class RikkaHubApp : Application() {
                         !settings.webServerLocalhostOnly &&
                         ContextCompat.checkSelfPermission(
                             this@RikkaHubApp,
-                            android.Manifest.permission.ACCESS_LOCAL_NETWORK
+                            "android.permission.ACCESS_LOCAL_NETWORK"
                         ) != PackageManager.PERMISSION_GRANTED
                     ) {
                         Log.w(TAG, "startWebServerIfEnabled: local network permission not granted, skipping")
