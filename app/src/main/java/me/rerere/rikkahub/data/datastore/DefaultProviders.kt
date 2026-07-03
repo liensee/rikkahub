@@ -14,7 +14,7 @@ import kotlin.uuid.Uuid
  *
  * 云端提供商仍可通过 UI 中的「添加提供商」手动添加。
  */
-val DEFAULT_LOCAL_MODEL_ID = Uuid.parse("b7055fb4-39f9-4042-a88a-0d80ed76cf08")
+val DEFAULT_AUTO_MODEL_ID = Uuid.parse("b7055fb4-39f9-4042-a88a-0d80ed76cf08")
 val DEFAULT_HERMES_ID = Uuid.parse("c8166fc5-4a0a-5153-b99f-f6fc9e827d1e")
 
 val DEFAULT_PROVIDERS = listOf(
@@ -28,7 +28,7 @@ val DEFAULT_PROVIDERS = listOf(
         builtIn = true,
         models = listOf(
             Model(
-                id = DEFAULT_LOCAL_MODEL_ID,
+                id = DEFAULT_AUTO_MODEL_ID,
                 modelId = "auto",
                 displayName = "Auto（自动检测）",
                 inputModalities = listOf(Modality.TEXT),

@@ -43,6 +43,7 @@ import org.koin.core.context.startKoin
 import me.rerere.ai.provider.Modality
 import me.rerere.ai.provider.Model
 import me.rerere.ai.provider.ProviderSetting
+import me.rerere.rikkahub.data.datastore.DEFAULT_AUTO_MODEL_ID
 import kotlin.uuid.Uuid
 
 private const val TAG = "RikkaHubApp"
@@ -52,7 +53,6 @@ const val CHAT_LIVE_UPDATE_NOTIFICATION_CHANNEL_ID = "chat_live_update"
 const val WEB_SERVER_NOTIFICATION_CHANNEL_ID = "web_server"
 
 // 双子星: 本地 Provider 固定 ID
-val DEFAULT_AUTO_MODEL_ID = Uuid.parse("b7055fb4-39f9-4042-a88a-0d80ed76cf08")
 val DEFAULT_LOCAL_MODEL_PROVIDER_ID = Uuid.parse("a8d2d463-e8c0-41f2-b89e-f5eb8e716cce")
 val DEFAULT_HERMES_PROVIDER_ID = Uuid.parse("c8166fc5-4a0a-5153-b99f-f6fc9e827d1e")
 
