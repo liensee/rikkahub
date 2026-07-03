@@ -311,35 +311,3 @@ fun UIMessage.toDto() = MessageDto(
     usage = usage,
     translation = translation
 )
-
-// ========== Skill DTOs ==========
-
-@Serializable
-data class SkillMetadataDto(
-    val name: String,
-    val description: String,
-    val compatibility: String? = null,
-    val allowedTools: List<String> = emptyList(),
-)
-
-@Serializable
-data class SkillDetailDto(
-    val metadata: SkillMetadataDto,
-    val content: String,
-)
-
-@Serializable
-data class SkillCreateRequest(
-    val content: String,
-)
-
-@Serializable
-data class SkillFileListDto(
-    val files: List<String>,
-)
-
-@Serializable
-data class SkillFileDto(
-    val path: String,
-    val content: String,
-)

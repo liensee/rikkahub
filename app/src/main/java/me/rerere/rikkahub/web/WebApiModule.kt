@@ -22,7 +22,6 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import me.rerere.rikkahub.data.datastore.SettingsStore
 import me.rerere.rikkahub.data.files.FilesManager
-import me.rerere.rikkahub.data.files.SkillManager
 import me.rerere.rikkahub.data.repository.ConversationRepository
 import me.rerere.rikkahub.service.ChatService
 import me.rerere.rikkahub.utils.JsonInstant
@@ -34,8 +33,6 @@ import me.rerere.rikkahub.web.routes.assetsRoutes
 import me.rerere.rikkahub.web.routes.conversationRoutes
 import me.rerere.rikkahub.web.routes.filesRoutes
 import me.rerere.rikkahub.web.routes.settingsRoutes
-import me.rerere.rikkahub.web.routes.skillsRoutes
-import me.rerere.rikkahub.web.routes.workflowsRoutes
 import java.security.MessageDigest
 import java.util.Date
 import java.util.UUID
@@ -63,9 +60,8 @@ fun Application.configureWebApi(
     chatService: ChatService,
     conversationRepo: ConversationRepository,
     settingsStore: SettingsStore,
-    filesManager: FilesManager,
-    skillManager: SkillManager,
-)
+    filesManager: FilesManager
+) {
     val jwtEnabled = settingsStore.settingsFlow.value.webServerJwtEnabled
 
     install(ContentNegotiation) {
@@ -173,16 +169,12 @@ fun Application.configureWebApi(
                     settingsRoutes(settingsStore)
                     filesRoutes(filesManager, context)
                     assetsRoutes(context)
-                    skillsRoutes(skillManager)
-                    workflowsRoutes(context)
                 }
             } else {
                 conversationRoutes(chatService, conversationRepo, settingsStore)
                 settingsRoutes(settingsStore)
                 filesRoutes(filesManager, context)
                 assetsRoutes(context)
-                skillsRoutes(skillManager)
-                workflowsRoutes(context)
             }
         }
     }
