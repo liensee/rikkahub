@@ -624,7 +624,11 @@ class ChatCompletionsAPI(
         )
 
         // 也许支持其他模态的输出content?
-        val content = jsonObject["content"]?.jsonPrimitiveOrNull?.contentOrNull ?: ""
+        val rawContent = jsonObject["content"]?.jsonPrimitiveOrNull?.contentOrNull
+        val content = if (rawContent.isNullOrEmpty()) {
+            // 双子星: reasoning 模型把 token 耗在 reasoning_content 上，content 为空时回退
+            jsonObject["reasoning_content"]?.jsonPrimitiveOrNull?.contentOrNull ?: ""
+        } else rawContent
         val reasoning = jsonObject["reasoning_content"]?.jsonPrimitiveOrNull?.contentOrNull
             ?: jsonObject["reasoning"]?.jsonPrimitiveOrNull?.contentOrNull
             ?: jsonObject["content"]?.takeIf { it is JsonArray }?.let { arr ->
