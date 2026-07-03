@@ -89,7 +89,7 @@ jobs:
       - name: Build Debug APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug -x :web:buildWebUi -x :web:compileDebugKotlin
+          ./gradlew assembleDebug -x :web:buildWebUi -x :web:compileDebugKotlin -x :web:compileDebugJavaWithJavac
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
