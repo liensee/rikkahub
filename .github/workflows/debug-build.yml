@@ -101,4 +101,4 @@ jobs:
         if: success()
         with:
           name: rikkahub-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/debug/app-universal-debug.apk
