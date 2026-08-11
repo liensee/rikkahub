@@ -16,3 +16,9 @@ app/build
 node_modules
 **/node_modules
 .idea
+
+app/build
+**/build
+node_modules
+**/node_modules
+.idea
