@@ -102,3 +102,11 @@ jobs:
         with:
           name: rikkahub-debug
           path: app/build/outputs/apk/debug/app-universal-debug.apk
+
+      - name: Upload APK to Release
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: gemini-build-${{ github.run_number }}
+          files: app/build/outputs/apk/debug/app-universal-debug.apk
+          generate_release_notes: false
