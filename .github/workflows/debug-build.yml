@@ -1,0 +1,104 @@
+name: Debug Build (Local LLM)
+
+on:
+  push:
+    branches:
+      - 'auto/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Node.js + pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install -g pnpm
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ hashFiles('web-ui/pnpm-lock.yaml') }}
+
+      - name: Install web-ui dependencies
+        working-directory: web-ui
+        run: pnpm install --frozen-lockfile
+
+      - name: Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Create dummy google-services.json
+        run: |
+          cat > app/google-services.json << 'JSONEOF'
+          {
+            "project_info": {"project_number": "0", "project_id": "dummy"},
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:0:android:000",
+                  "android_client_info": {"package_name": "me.rerere.rikkahub"}
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy"}],
+                "services": {
+                  "analytics_service": {"status": 1},
+                  "appinvite_service": {"status": 1},
+                  "ads_service": {"status": 1}
+                }
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:0:android:001",
+                  "android_client_info": {"package_name": "me.rerere.rikkahub.debug"}
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy"}],
+                "services": {
+                  "analytics_service": {"status": 1},
+                  "appinvite_service": {"status": 1},
+                  "ads_service": {"status": 1}
+                }
+              }
+            ]
+          }
+          JSONEOF
+
+      - name: Create local.properties
+        run: |
+          echo "sdk.dir=/usr/lib/android-sdk" > local.properties
+
+      - name: Create dummy web static resources
+        run: |
+          mkdir -p web/src/main/resources/static
+          echo '<html><body>RikkaHub Web UI</body></html>' > web/src/main/resources/static/index.html
+
+      - name: Build Debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug -x :web:buildWebUi
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: rikkahub-debug
+          path: app/build/outputs/apk/debug/app-universal-debug.apk
